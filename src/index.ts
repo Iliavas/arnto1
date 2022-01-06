@@ -1,70 +1,58 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-param-reassign */
 import * as BABYLON from 'babylonjs';
-import * as ZapparBabylon from '@zappar/zappar-babylonjs';
-import faceMeshTexture from '../assets/faceMeshTemplate.png';
+import * as ZapparBabylon from '@zappar/zappar-babylonjs'; //библеотеки
 import 'babylonjs-loaders';
-import './index.sass';
-
-// The SDK is supported on many different browsers, but there are some that
-// don't provide camera access. This function detects if the browser is supported
-// For more information on support, check out the readme over at
-// https://www.npmjs.com/package/@zappar/zappar-babylonjs
-if (ZapparBabylon.browserIncompatible()) {
-  // The browserIncompatibleUI() function shows a full-page dialog that informs the user
-  // they're using an unsupported browser, and provides a button to 'copy' the current page
-  // URL so they can 'paste' it into the address bar of a compatible alternative.
-  ZapparBabylon.browserIncompatibleUI();
-
-  // If the browser is not compatible, we can avoid setting up the rest of the page
-  // so we throw an exception here.
-  throw new Error('Unsupported browser');
-}
-
-// Setup BabylonJS in the usual way
+import './styles.sass'; //стили
+import texture1 from "../images/1.png" //текстуры масок
+import texture2 from "../images/2.png"
+import texture3 from "../images/3.png"
+//для удобства все импорты в одном месте
 const canvas = document.createElement('canvas');
+const eng = new BABYLON.Engine(canvas, true);
+if (ZapparBabylon.browserIncompatible()) {
+  ZapparBabylon.browserIncompatibleUI();
+  throw new Error('бразузер не поддерживается');
+}
+//создаем AR сцену
+export const scene = new BABYLON.Scene(eng);
+let next = document.getElementById("dalee")
+let previous = document.getElementById("nazad")
 document.body.appendChild(canvas);
-
-const engine = new BABYLON.Engine(canvas, true);
-
-export const scene = new BABYLON.Scene(engine);
-// eslint-disable-next-line no-unused-vars
 const light = new BABYLON.HemisphericLight('light1', new BABYLON.Vector3(0, 1, 0), scene);
-
-// Setup a Zappar camera instead of one of Babylon's cameras
-export const camera = new ZapparBabylon.Camera('ZapparCamera', scene);
-
-// Request the necessary permission from the user
-ZapparBabylon.permissionRequestUI().then((granted) => {
-  if (granted) camera.start(true);
-  else ZapparBabylon.permissionDeniedUI();
-});
-
+export const cum = new ZapparBabylon.Camera('ZapparCamera', scene); //создаем камеру в переменную
+ZapparBabylon.permissionRequestUI().then((granted) => {if (granted) {cum.start(true)}else {ZapparBabylon.permissionDeniedUI()};}); //запрос на  валидность браузера
+//объявляем трекер лица человека
 const faceTracker = new ZapparBabylon.FaceTrackerLoader().load();
-const trackerTransformNode = new ZapparBabylon.FaceTrackerTransformNode('tracker', camera, faceTracker, scene);
-
+const trackerTransformNode = new ZapparBabylon.FaceTrackerTransformNode('tracker', cum, faceTracker, scene);
 trackerTransformNode.setEnabled(false);
-faceTracker.onVisible.bind(() => {
-  trackerTransformNode.setEnabled(true);
-});
-faceTracker.onNotVisible.bind(() => {
-  trackerTransformNode.setEnabled(false);
-});
-
-const material = new BABYLON.StandardMaterial('mat', scene);
-material.diffuseTexture = new BABYLON.Texture(faceMeshTexture, scene);
-
-const faceMesh = new ZapparBabylon.FaceMeshGeometry('mesh', scene);
-faceMesh.parent = trackerTransformNode;
-faceMesh.material = material;
-
+faceTracker.onVisible.bind(() => {trackerTransformNode.setEnabled(true);});
+faceTracker.onNotVisible.bind(() => {trackerTransformNode.setEnabled(false);});
+const mat = new BABYLON.StandardMaterial('mat', scene);
+mat.diffuseTexture = new BABYLON.Texture(texture1, scene);
+let b = 0
+let textures = [ texture1, texture2, texture3]
+//функционал кнопок
+document.addEventListener("DOMContentLoaded", () => {
+  if (next != null){
+    next.onclick = function(){
+      if (b < textures.length-1){b+=1}else{b = 0}
+      mat.diffuseTexture = new BABYLON.Texture(textures[b], scene);
+}}});
+document.addEventListener("DOMContentLoaded", ()=>{
+  if (previous != null){
+    previous.onclick = function(){
+    if (b > 0){b-=1}else{b = textures.length-1}
+    mat.diffuseTexture = new BABYLON.Texture(textures[b], scene);
+}}})
 window.addEventListener('resize', () => {
-  engine.resize();
+  eng.resize();
 });
-
-// Set up our render loop
-engine.runRenderLoop(() => {
-  faceMesh.updateFromFaceTracker(faceTracker);
-  camera.updateFrame();
-  scene.render();
+//создаем плоскость
+const MeahFace = new ZapparBabylon.FaceMeshGeometry('mesh', scene);
+MeahFace.parent = trackerTransformNode;
+MeahFace.material = mat; 
+//делаем бесконечный цикл приложения
+eng.runRenderLoop(() => {
+  MeahFace.updateFromFaceTracker(faceTracker);
+  cum.updateFrame(); //делаем апдейт кадра
+  scene.render(); //рендерим сцену 
 });

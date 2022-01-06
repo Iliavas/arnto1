@@ -14,13 +14,13 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
       filename: 'index.html',
-      favicon: 'assets/favicon.png',
-      title: 'Zappar Universal AR',
+      title: 'Новогодняя маска',
       minify: {
         collapseWhitespace: true,
         minifyCSS: true,
       },
-    }),
+    })
+    
   ],
   devServer: {
     contentBase: './dist/',
