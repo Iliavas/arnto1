@@ -5,6 +5,8 @@ import './styles.sass'; //стили
 import texture1 from "../images/1.png" //текстуры масок
 import texture2 from "../images/2.png"
 import texture3 from "../images/3.png"
+import texture4 from "../images/4.png"
+
 //для удобства все импорты в одном месте
 const canvas = document.createElement('canvas');
 const eng = new BABYLON.Engine(canvas, true);
@@ -29,7 +31,7 @@ faceTracker.onNotVisible.bind(() => {trackerTransformNode.setEnabled(false);});
 const mat = new BABYLON.StandardMaterial('mat', scene);
 mat.diffuseTexture = new BABYLON.Texture(texture1, scene);
 let b = 0
-let textures = [ texture1, texture2, texture3]
+let textures = [ texture1, texture2, texture3, texture4]
 //функционал кнопок
 document.addEventListener("DOMContentLoaded", () => {
   if (next != null){
